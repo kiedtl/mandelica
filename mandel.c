@@ -7,9 +7,9 @@
 int
 main(int argc, char **argv)
 {
-	u32 height = 400;
+	u32 height = 600;
 	u32 width  = 800;
-	usize iter =  40;
+	usize iter =  30;
 
 	double minre   = -2.0;
 	double maxre   =  1.0;
@@ -34,10 +34,10 @@ main(int argc, char **argv)
 	}
 
 	for (usize y = 0; y < height; ++y) {
-		double c_im = maxim - y * im_fact;
+		double c_im = (y - height / 1.8) * 3.5 / width;
 
 		for (usize x = 0; x < width; ++x) {
-			double c_re = minre + x * re_fact;
+			double c_re = (x - width / 1.8) * 3.5 / width;
 			double Z_re = c_re, Z_im = c_im;
 
         		/* number of iterations */
@@ -53,7 +53,9 @@ main(int argc, char **argv)
 			}
 
 			/* set pixel */
-			u16 color = 0xffff - (ctr * 3000);
+			u16 color = 0xffff;// - (ctr * 5000);
+			if (ctr == iter) color = 0x0000;
+
 			data[4 * x + 0] = htons(color);
 			data[4 * x + 1] = htons(color);
 			data[4 * x + 2] = htons(color);
