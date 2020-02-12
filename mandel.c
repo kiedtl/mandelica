@@ -7,11 +7,16 @@
 int
 main(int argc, char **argv)
 {
-	u32 height = 31;
-	u32 width  = 80;
+	u32 height = 400;
+	u32 width  = 800;
+	usize iter =  40;
 
-	usize ctr = 0;
-	float i, j, r;
+	double minre   = -2.0;
+	double maxre   =  1.0;
+	double minim   = -1.2;
+	double maxim   = minim + (maxre - minre) * height / width;
+	double re_fact = (maxre - minre) / (width - 1);
+	double im_fact = (maxim - maxim) / (height - 1);
 
 	/* initialize farbfeld stuff */
 	u32 buf;
@@ -21,35 +26,42 @@ main(int argc, char **argv)
 	buf = htonl(height);
 	fwrite(&buf, sizeof(buf), 1, stdout);        /* height */
 
-	u16 *data = realloc(NULL, width * ((sizeof("RGBA") - 1) * sizeof(u16)));
+	u16 *data = malloc(width * ((sizeof("RGBA") - 1) * sizeof(u16)));
 	if (data == NULL) {
-		fprintf(stderr, "error: realloc: ");
+		fprintf(stderr, "error: malloc: ");
 		perror(NULL);
 		return 1;
 	}
 
-	for (float y = -16; y < 15; ++y) {
-		for (float x = 0; x < 84; ++x) {
-			for (i = r = ctr = 0;;) {
-				j = r * r - i * i - 2 + x / 25;
-				i = 2 * r * i + y / 10;
+	for (usize y = 0; y < height; ++y) {
+		double c_im = maxim - y * im_fact;
 
-				r = j;
-				++ctr;
+		for (usize x = 0; x < width; ++x) {
+			double c_re = minre + x * re_fact;
+			double Z_re = c_re, Z_im = c_im;
 
-				if (j * j + i * i >= 11 || ctr >= 30)
-					break;
+        		/* number of iterations */
+			usize ctr;
+
+			for (ctr = 0; ctr < iter; ++ctr) {
+				double Z_re2 = Z_re * Z_re, Z_im2 = Z_im * Z_im;
+
+				if (Z_re2 + Z_im2 > 4) break;
+
+				Z_im = 2 * Z_re * Z_im + c_im;
+				Z_re = Z_re2 - Z_im2 + c_re;
 			}
 
-			//putchar(62 - ctr);
-			u16 color = 0xffff;
-			if (ctr == 30) color = 0x0000;
-			data[4 * (size_t) x + 0] = htons(color);
-			data[4 * (size_t) x + 1] = htons(color);
-			data[4 * (size_t) x + 2] = htons(color);
-			data[4 * (size_t) x + 3] = htons(0xffff);
+			/* set pixel */
+			u16 color = 0xffff - (ctr * 3000);
+			data[4 * x + 0] = htons(color);
+			data[4 * x + 1] = htons(color);
+			data[4 * x + 2] = htons(color);
+			data[4 * x + 3] = htons(0xffff);
+			//fprintf(stdout, "%c[%i;%iH%c", 27, y, x, 62 - ctr);
 		}
 
+		/* print row for image */
 		fwrite(data, sizeof(u16), width * 4, stdout);
 	}
 }
