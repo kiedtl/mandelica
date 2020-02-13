@@ -1,4 +1,14 @@
+/*
+ * winsock.h on windows,
+ * arpa/inet.h on unix
+ * for htons()
+ */
+#if defined(_WIN32) || defined(__WIN32__)
+#include <winsock.h>
+#else
 #include <arpa/inet.h>
+#endif
+
 #include <math.h>
 #include <limits.h>
 #include <stdio.h>
