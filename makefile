@@ -4,7 +4,7 @@ SRC         = argoat.c util.c mandel.c
 OBJ         = $(SRC:.c=.o)
 HDR         = $(SRC:.c=.h)
 
-INC         = -I. -Isub/ccommon/
+INC         = -Isub/ccommon/
 
 CC          = gcc
 CFLAGS      = -std=c99 -pedantic -O4 $(INC) -ggdb
