@@ -10,10 +10,10 @@ float clamp(float value);
 int
 main(int argc, char **argv)
 {
-	u32 height = 6000;
-	u32 width  = 12000;
+	u32 height = 1000;
+	u32 width  = 2000;
 	u64 total  = height * width;
-	u32 iter   = 200;
+	u32 iter   = 100;
 
 	/* column (x) counter */
 	usize pxctr = 0;
