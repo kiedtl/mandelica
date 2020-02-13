@@ -1,22 +1,29 @@
 #include <arpa/inet.h>
 #include <math.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "types.h"
 
+float clamp(float value);
+
 int
 main(int argc, char **argv)
 {
-	u32 height = 600;
-	u32 width  = 800;
-	usize iter =  30;
+	u32 height = 6000;
+	u32 width  = 12000;
+	u64 total  = height * width;
+	u32 iter   = 200;
 
-	double minre   = -2.0;
-	double maxre   =  1.0;
-	double minim   = -1.2;
-	double maxim   = minim + (maxre - minre) * height / width;
-	double re_fact = (maxre - minre) / (width - 1);
-	double im_fact = (maxim - maxim) / (height - 1);
+	/* column (x) counter */
+	usize pxctr = 0;
+
+	//double minre   = -2.0;
+	//double maxre   =  1.0;
+	//double minim   = -1.2;
+	//double maxim   = minim + (maxre - minre) * height / width;
+	//double re_fact = (maxre - minre) / (width - 1);
+	//double im_fact = (maxim - maxim) / (height - 1);
 
 	/* initialize farbfeld stuff */
 	u32 buf;
@@ -36,7 +43,7 @@ main(int argc, char **argv)
 	for (usize y = 0; y < height; ++y) {
 		double c_im = (y - height / 1.8) * 3.5 / width;
 
-		for (usize x = 0; x < width; ++x) {
+		for (usize x = 0; x < width; ++x, ++pxctr) {
 			double c_re = (x - width / 1.8) * 3.5 / width;
 			double Z_re = c_re, Z_im = c_im;
 
@@ -52,18 +59,50 @@ main(int argc, char **argv)
 				Z_re = Z_re2 - Z_im2 + c_re;
 			}
 
-			/* set pixel */
-			u16 color = 0xffff;// - (ctr * 5000);
-			if (ctr == iter) color = 0x0000;
+			/* get color based on iterations */
+			float quotient = ((float) ctr) / ((float) iter);
+			u16 color = (u16) (quotient * (float) 0xffff);
+			
+			//DEBUG("quotient = %f\tcolor = %i\n", quotient, color);
 
-			data[4 * x + 0] = htons(color);
-			data[4 * x + 1] = htons(color);
-			data[4 * x + 2] = htons(color);
-			data[4 * x + 3] = htons(0xffff);
+			/* set pixel */
+			if (ctr != iter) {
+				if (ctr > (iter / 2)) {
+					data[4 * x + 0] = htons(color);     /* red */
+					data[4 * x + 1] = htons(0xffff);    /* green */
+					data[4 * x + 2] = htons(color);     /* blue */
+				} else {
+					data[4 * x + 0] = htons(0x0000);    /* red */
+					data[4 * x + 1] = htons(color);     /* green */
+					data[4 * x + 2] = htons(0x0000);    /* blue */
+				}
+			} else {
+				data[4 * x + 0] = htons(0x0000);    /* red */
+				data[4 * x + 1] = htons(0x0000);    /* green */
+				data[4 * x + 2] = htons(0x0000);    /* blue */
+			}
+
+			data[4 * x + 3] = htons(0xffff);   /* alpha */
+			
 			//fprintf(stdout, "%c[%i;%iH%c", 27, y, x, 62 - ctr);
+
+			if (pxctr % 2048 == 0) {
+				fprintf(stderr,
+					"%c[smandel: on pixel %i/%i, row %i/%i, %f%% done.%c[u",
+					27, pxctr, total, y, height,
+					((double) pxctr) / ((double) total) * 100, 27);
+			}
 		}
 
 		/* print row for image */
 		fwrite(data, sizeof(u16), width * 4, stdout);
 	}
+}
+
+float
+clamp(float value)
+{
+	if (value >= 1.f) return 1.f;
+	else if (value <= 0.f) return 0.f;
+	else return value;
 }
