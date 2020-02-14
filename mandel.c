@@ -34,10 +34,11 @@ main(int argc, char **argv)
 	opts->iter    = 100;
 	opts->verbose = FALSE;
 
-	u64 total = opts->height * opts->width;
-
 	/* pixel counter */
 	u64 pxctr = 0;
+
+	/* data counter */
+	u64 bctr = 0;
 
 	/* parse arguments */
 	/* TODO: add version, help */
@@ -55,6 +56,8 @@ main(int argc, char **argv)
 
 	struct argoat args = { sprigs, sizeof(sprigs), NULL, 0, 0 };
 	argoat_graze(&args, argc, argv);
+
+	u64 total = opts->height * opts->width;
 
 	/*
 	 * TODO: define the following and
@@ -82,18 +85,19 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	for (usize y = 0; y < opts->height; ++y) {
-		double c_im = (y - opts->height / 1.8) * 3.5 / opts->width;
+	usize y;
+	for (y = 0; y < opts->height; ++y) {
+		float c_im = (y - opts->height / 1.8) * 3.5 / opts->width;
 
 		for (usize x = 0; x < opts->width; ++x, ++pxctr) {
-			double c_re = (x - opts->width / 1.8) * 3.5 / opts->width;
-			double Z_re = c_re, Z_im = c_im;
+			float c_re = (x - opts->width / 1.8) * 3.5 / opts->width;
+			float Z_re = c_re, Z_im = c_im;
 
         		/* number of iterations */
 			usize ctr;
 
 			for (ctr = 0; ctr < opts->iter; ++ctr) {
-				double Z_re2 = Z_re * Z_re, Z_im2 = Z_im * Z_im;
+				float Z_re2 = Z_re * Z_re, Z_im2 = Z_im * Z_im;
 
 				if (Z_re2 + Z_im2 > 4) break;
 
@@ -124,17 +128,21 @@ main(int argc, char **argv)
 
 			buf[4 * x + 3] = htons(0xffff);   /* alpha */
 			
-			if (pxctr % 2048 == 0 && opts->verbose) {
-				fprintf(stderr, "\rmandel: pixel %i/%i, row %i/%i, %f%% done.",
-						(long) pxctr, (long) total, (long) y, (long) opts->height,
-						(double) (((double) pxctr) / ((double) total) * 100));
+			if ((pxctr & 2047) == 0 && opts->verbose) {
+				fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.",
+						pxctr, total, y, opts->height,
+						bctr / 1024 / 1024,
+						(float) (((float) pxctr) / ((float) total) * 100));
 			}
 		}
 
 		/* print row for image */
-		fwrite(buf, sizeof(u16), opts->width * 4, stdout);
+		bctr += (fwrite(buf, sizeof(u16), opts->width * 4, stdout) * sizeof(u16));
 	}
 
-	if (buf)
-		free(buf);
+	fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.\n",
+			pxctr, total, y, opts->height,
+			bctr / 1024 / 1024,
+			(float) (((float) pxctr) / ((float) total) * 100));
+	if (buf) free(buf);
 }
