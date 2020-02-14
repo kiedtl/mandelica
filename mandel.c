@@ -109,7 +109,11 @@ main(int argc, char **argv)
 			float quotient = ((float) ctr) / ((float) opts->iter);
 			u16 color = (u16) (quotient * (float) 0xffff);
 			
-			/* set pixel */
+			/*
+			 * set pixel
+			 * TODO: allow pixel hue to be controllable
+			 * via command-line options
+			 */
 			if (ctr != opts->iter) {
 				if (ctr > (opts->iter / 2)) {
 					buf[4 * x + 0] = htons(color);     /* red */
