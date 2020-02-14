@@ -36,7 +36,7 @@ main(int argc, char **argv)
 
 	u64 total = opts->height * opts->width;
 
-	/* column (x) counter */
+	/* pixel counter */
 	u64 pxctr = 0;
 
 	/* parse arguments */
@@ -125,10 +125,9 @@ main(int argc, char **argv)
 			buf[4 * x + 3] = htons(0xffff);   /* alpha */
 			
 			if (pxctr % 2048 == 0 && opts->verbose) {
-				fprintf(stderr,
-					"%c[smandel: on pixel %i/%i, row %i/%i, %f%% done.%c[u",
-					27, pxctr, total, y, opts->height,
-					((double) pxctr) / ((double) total) * 100, 27);
+				fprintf(stderr, "\rmandel: pixel %i/%i, row %i/%i, %f%% done.",
+						(long) pxctr, (long) total, (long) y, (long) opts->height,
+						(double) (((double) pxctr) / ((double) total) * 100));
 			}
 		}
 
@@ -136,5 +135,6 @@ main(int argc, char **argv)
 		fwrite(buf, sizeof(u16), opts->width * 4, stdout);
 	}
 
-	if (buf) free(buf);
+	if (buf)
+		free(buf);
 }
