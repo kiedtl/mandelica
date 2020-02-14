@@ -7,7 +7,7 @@ HDR         = $(SRC:.c=.h)
 INC         = -Isub/ccommon/
 
 CC          = gcc
-CFLAGS      = -std=c99 -pedantic -O4 $(INC) -ggdb
+CFLAGS      = -std=c99 -pedantic $(INC) -ggdb
 
 all: $(NAME)
 
