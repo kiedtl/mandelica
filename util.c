@@ -14,19 +14,13 @@ clamp(float value)
 void
 handle_uint(void *data, char **pars, const int pars_count)
 {
-	u32 buf;
-	char *p = (char*) data;
+	u32 buf = 0;
+	char *p = pars[0];
 
 	while (*p) {
-		if (*p >= '0' && *p <= '9') {
+		if (*p >= '0' && *p <= '9')
 			buf = (buf * 10) + (*p - '0');
-		} else {
-			fprintf(stderr,
-				"mandel: error: '%s' isn't a valid integer.\n",
-				(char*) data);
-
-			exit(1);
-		}
+		++p;
 	}
 
 	*((u32*) data) = buf;

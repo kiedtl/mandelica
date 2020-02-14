@@ -29,9 +29,9 @@ main(int argc, char **argv)
 	}
 
 	/* initialize default options */
-	opts->height  = 1000;
-	opts->width   = 2000;
-	opts->iter    =  100;
+	opts->height  = 400;
+	opts->width   = 800;
+	opts->iter    = 100;
 	opts->verbose = FALSE;
 
 	u64 total = opts->height * opts->width;
@@ -43,14 +43,14 @@ main(int argc, char **argv)
 	/* TODO: add version, help */
 	const struct argoat_sprig sprigs[9] = {
 		{ NULL,      0, NULL, NULL },
-		{ "height",  1, (void*) opts->height,  handle_uint },
-		{ "h",       1, (void*) opts->height,  handle_uint },
-		{ "width",   1, (void*) opts->width,   handle_uint },
-		{ "w",       1, (void*) opts->width,   handle_uint },
-		{ "iters",   1, (void*) opts->iter,    handle_uint },
-		{ "i",       1, (void*) opts->iter,    handle_uint },
-		{ "verbose", 0, (void*) opts->verbose, handle_bool },
-		{ "v",       0, (void*) opts->verbose, handle_bool },
+		{ "height",  1, (void*) &opts->height,  handle_uint },
+		{ "h",       1, (void*) &opts->height,  handle_uint },
+		{ "width",   1, (void*) &opts->width,   handle_uint },
+		{ "w",       1, (void*) &opts->width,   handle_uint },
+		{ "iters",   1, (void*) &opts->iter,    handle_uint },
+		{ "i",       1, (void*) &opts->iter,    handle_uint },
+		{ "verbose", 0, (void*) &opts->verbose, handle_bool },
+		{ "v",       0, (void*) &opts->verbose, handle_bool },
 	};
 
 	struct argoat args = { sprigs, sizeof(sprigs), NULL, 0, 0 };
@@ -69,15 +69,15 @@ main(int argc, char **argv)
 	 */
 
 	/* initialize farbfeld stuff */
-	u32 buf;
+	u32 tmp;
 	fputs("farbfeld", stdout);                   /* magic value */
-	buf = htonl(opts->width);
-	fwrite(&buf, sizeof(buf), 1, stdout);        /* width */
-	buf = htonl(opts->height);
-	fwrite(&buf, sizeof(buf), 1, stdout);        /* height */
+	tmp = htonl(opts->width);
+	fwrite(&tmp, sizeof(tmp), 1, stdout);        /* width */
+	tmp = htonl(opts->height);
+	fwrite(&tmp, sizeof(tmp), 1, stdout);        /* height */
 
-	u16 *data = (u16*) malloc(opts->width * (4 * sizeof(u16)));
-	if (data == NULL) {
+	u16 *buf = malloc(opts->width * (4 * sizeof(u16)));
+	if (buf == NULL) {
 		perror("mandel: error: ");
 		return 1;
 	}
@@ -108,21 +108,21 @@ main(int argc, char **argv)
 			/* set pixel */
 			if (ctr != opts->iter) {
 				if (ctr > (opts->iter / 2)) {
-					data[4 * x + 0] = htons(color);     /* red */
-					data[4 * x + 1] = htons(0xffff);    /* green */
-					data[4 * x + 2] = htons(0xffff);    /* blue */
+					buf[4 * x + 0] = htons(color);     /* red */
+					buf[4 * x + 1] = htons(0xffff);    /* green */
+					buf[4 * x + 2] = htons(0xffff);    /* blue */
 				} else {
-					data[4 * x + 0] = htons(0x0000);    /* red */
-					data[4 * x + 1] = htons(color);     /* green */
-					data[4 * x + 2] = htons(color);     /* blue */
+					buf[4 * x + 0] = htons(0x0000);    /* red */
+					buf[4 * x + 1] = htons(color);     /* green */
+					buf[4 * x + 2] = htons(color);     /* blue */
 				}
 			} else {
-				data[4 * x + 0] = htons(0x0000);    /* red */
-				data[4 * x + 1] = htons(0x0000);    /* green */
-				data[4 * x + 2] = htons(0x0000);    /* blue */
+				buf[4 * x + 0] = htons(0x0000);    /* red */
+				buf[4 * x + 1] = htons(0x0000);    /* green */
+				buf[4 * x + 2] = htons(0x0000);    /* blue */
 			}
 
-			data[4 * x + 3] = htons(0xffff);   /* alpha */
+			buf[4 * x + 3] = htons(0xffff);   /* alpha */
 			
 			if (pxctr % 2048 == 0 && opts->verbose) {
 				fprintf(stderr,
@@ -133,6 +133,8 @@ main(int argc, char **argv)
 		}
 
 		/* print row for image */
-		fwrite(data, sizeof(u16), opts->width * 4, stdout);
+		fwrite(buf, sizeof(u16), opts->width * 4, stdout);
 	}
+
+	if (buf) free(buf);
 }

@@ -7,7 +7,8 @@ HDR         = $(SRC:.c=.h)
 INC         = -Isub/ccommon/
 
 CC          = gcc
-CFLAGS      = -std=c99 -pedantic $(INC) -ggdb
+CFLAGS      = -std=c99 -pedantic $(INC) -ggdb \
+	      -fno-omit-frame-pointer
 
 all: $(NAME)
 
