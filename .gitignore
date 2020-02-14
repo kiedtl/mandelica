@@ -1,3 +1,9 @@
 mandel
 **/*.*.swp
 *.o
+
+# ignore test images
+*.png
+*.jpg
+*.ff
+*.ppm
