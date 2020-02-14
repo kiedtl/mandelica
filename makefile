@@ -1,5 +1,8 @@
 NAME        = mandel
 
+WARN        = -Wall -Wextra -pedantic -Wmissing-prototypes \
+              -Wold-style-definition -Werror -Wno-unused-parameter
+
 SRC         = argoat.c util.c mandel.c
 OBJ         = $(SRC:.c=.o)
 HDR         = $(SRC:.c=.h)
@@ -7,14 +10,15 @@ HDR         = $(SRC:.c=.h)
 INC         = -Isub/ccommon/
 
 CC          = gcc
-CFLAGS      = -std=c99 -pedantic $(INC) -ggdb
+CFLAGS      = -std=c99 -O4 $(WARN) $(INC) -ggdb
+LDFLAGS     = -fuse-ld=gold
 
 all: $(NAME)
 
 $(SRC): $(HDR)
 
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 clean:
 	rm -f $(OBJ) $(NAME)
