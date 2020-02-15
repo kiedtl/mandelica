@@ -1,7 +1,7 @@
 NAME        = mandel
 
 WARN        = -Wall -Wextra -pedantic -Wmissing-prototypes \
-              -Wold-style-definition -Werror -Wno-unused-parameter
+              -Wold-style-definition -Wno-unused-parameter
 
 SRC         = argoat.c util.c mandel.c
 OBJ         = $(SRC:.c=.o)
