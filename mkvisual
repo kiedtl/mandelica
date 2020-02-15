@@ -4,9 +4,12 @@
 # (c) Kiëd Llaentenn (@kiedtl)
 # See the LICENSE for more information.
 
+imgs=""
+
 for i in {1..30}; do
     ./mandel -w 500 -h 500 -i ${i} -v | ff2jpg > "tmp${i}.jpg"
+    imgs="${imgs} tmp${i}.jpg"
 done
 
-convert -delay 80 -loop 0 tmp*.jpg visual-iter.gif
+convert -delay 80 -loop 0 $imgs visual-iter.gif
 rm tmp*.jpg
