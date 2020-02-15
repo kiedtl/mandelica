@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# mkvisual -- create a GIF from multiple jpg's with different iters
+# (c) Kiëd Llaentenn (@kiedtl)
+# See the LICENSE for more information.
+
+for i in {1..30}; do
+    ./mandel -w 500 -h 500 -i ${i} -v | ff2jpg > "tmp${i}.jpg"
+done
+
+convert -delay 80 -loop 0 tmp*.jpg visual-iter.gif
+rm tmp*.jpg
