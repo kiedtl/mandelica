@@ -24,15 +24,21 @@ main(int argc, char **argv)
 	opts = malloc(1 * sizeof(struct Options*));
 
 	if (opts == NULL) {
-		perror("mandel: error: ");
+		perror("mandelica: error: ");
 		return 1;
 	}
 
 	/* initialize default options */
-	opts->height  = 400;
+	opts->height  = 650;
 	opts->width   = 800;
 	opts->iter    = 100;
 	opts->verbose = FALSE;
+
+	opts->minre   = -2.0;      /* the left border */
+	opts->maxre   = 1.0;       /* right border */
+	opts->minim   = -1.2;      /* bottom border */
+	opts->maxim   = opts->minim + (opts->maxre - opts->minre)
+		* opts->height/opts->width;
 
 	/* pixel counter */
 	u64 pxctr = 0;
@@ -42,34 +48,29 @@ main(int argc, char **argv)
 
 	/* parse arguments */
 	/* TODO: add version, help */
-	const struct argoat_sprig sprigs[9] = {
-		{ NULL,      0, NULL, NULL },
-		{ "height",  1, (void*) &opts->height,  handle_uint },
-		{ "h",       1, (void*) &opts->height,  handle_uint },
-		{ "width",   1, (void*) &opts->width,   handle_uint },
-		{ "w",       1, (void*) &opts->width,   handle_uint },
-		{ "iters",   1, (void*) &opts->iter,    handle_uint },
-		{ "i",       1, (void*) &opts->iter,    handle_uint },
-		{ "verbose", 0, (void*) &opts->verbose, handle_bool },
-		{ "v",       0, (void*) &opts->verbose, handle_bool },
+	const struct argoat_sprig sprigs[19] = {
+		{ NULL,       0, NULL,                   NULL         },
+		{ "height",   1, (void*) &opts->height,  handle_u32   },
+		{ "h",        1, (void*) &opts->height,  handle_u32   },
+		{ "width",    1, (void*) &opts->width,   handle_u32   },
+		{ "w",        1, (void*) &opts->width,   handle_u32   },
+		{ "iters",    1, (void*) &opts->iter,    handle_u32   },
+		{ "i",        1, (void*) &opts->iter,    handle_u32   },
+		{ "leftbdr",  1, (void*) &opts->minre,   handle_float },
+		{ "rightbdr", 1, (void*) &opts->maxre,   handle_float },
+		{ "downbdr",  1, (void*) &opts->minim,   handle_float },
+		{ "topbdr",   1, (void*) &opts->maxim,   handle_float },
+		{ "verbose",  0, (void*) &opts->verbose, handle_bool  },
+		{ "v",        0, (void*) &opts->verbose, handle_bool  },
+		{ "version",  0, NULL,                   version      },
+		{ "V",        0, NULL,                   version      },
+		{ "help",     0, NULL,                   help         },
 	};
 
 	struct argoat args = { sprigs, sizeof(sprigs), NULL, 0, 0 };
 	argoat_graze(&args, argc, argv);
 
 	u64 total = opts->height * opts->width;
-
-	/*
-	 * TODO: define the following and
-	 * make it possible to tweak them
-	 * via command-line arguments:
-	 * 	- MinRe
-	 * 	- MaxRe
-	 * 	- MinIm
-	 * 	- MaxIm
-	 * 
-	 * (and also re_fact, im_fact, etc)
-	 */
 
 	/* initialize farbfeld stuff */
 	u32 tmp;
@@ -81,16 +82,19 @@ main(int argc, char **argv)
 
 	u16 *buf = malloc(opts->width * (4 * sizeof(u16)));
 	if (buf == NULL) {
-		perror("mandel: error: ");
+		perror("mandelica: error: ");
 		return 1;
 	}
 
 	usize y;
 	for (y = 0; y < opts->height; ++y) {
-		float c_im = (y - opts->height / 1.8) * 3.5 / opts->width;
+		float c_im = opts->maxim - y * (opts->maxim - opts->minim)
+			/ (opts->height - 1);
 
 		for (usize x = 0; x < opts->width; ++x, ++pxctr) {
-			float c_re = (x - opts->width / 1.8) * 3.5 / opts->width;
+			float c_re = opts->minre + x * (opts->maxre - opts->minre)
+				/ (opts->width - 1);
+
 			float Z_re = c_re, Z_im = c_im;
 
         		/* number of iterations */
@@ -133,7 +137,7 @@ main(int argc, char **argv)
 			buf[4 * x + 3] = htons(0xffff);   /* alpha */
 			
 			if ((pxctr & 2047) == 0 && opts->verbose) {
-				fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.",
+				fprintf(stderr, "\rmandelica: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.",
 						pxctr, total, y, opts->height,
 						bctr / 1024 / 1024,
 						(float) (((float) pxctr) / ((float) total) * 100));
@@ -150,5 +154,6 @@ main(int argc, char **argv)
 				bctr / 1024 / 1024,
 				(float) (((float) pxctr) / ((float) total) * 100));
 	}
+
 	if (buf) free(buf);
 }
