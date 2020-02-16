@@ -8,6 +8,11 @@ typedef struct Options {
 	u32 width;
 	u32 iter;
 
+	float minre;
+	float maxre;
+	float minim;
+	float maxim;
+
 	bool verbose;
 } Options;
 

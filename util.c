@@ -11,19 +11,29 @@ clamp(float value)
 	else return value;
 }
 
-void
-handle_uint(void *data, char **pars, const int pars_count)
+u32
+parse_uint(char *src)
 {
 	u32 buf = 0;
-	char *p = pars[0];
 
-	while (*p) {
-		if (*p >= '0' && *p <= '9')
-			buf = (buf * 10) + (*p - '0');
-		++p;
+	for (; *src; ++src) {
+		if (*src >= '0' && *src <= '9')
+			buf = (buf * 10) + (*src - '0');
 	}
 
-	*((u32*) data) = buf;
+	return buf;
+}
+
+void
+handle_u32(void *data, char **pars, const int pars_count)
+{
+	*((u32*) data) = parse_uint(pars[0]);
+}
+
+void
+handle_float(void *data, char **pars, const int pars_count)
+{
+	*((float*) data) = strtof(pars[0], NULL);
 }
 
 void

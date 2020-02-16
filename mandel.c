@@ -29,10 +29,16 @@ main(int argc, char **argv)
 	}
 
 	/* initialize default options */
-	opts->height  = 400;
+	opts->height  = 650;
 	opts->width   = 800;
 	opts->iter    = 100;
 	opts->verbose = FALSE;
+
+	opts->minre   = -2.0;      /* the left border */
+	opts->maxre   = 1.0;       /* right border */
+	opts->minim   = -1.2;      /* bottom border */
+	opts->maxim   = opts->minim + (opts->maxre - opts->minre)
+		* opts->height/opts->width;
 
 	/* pixel counter */
 	u64 pxctr = 0;
@@ -42,34 +48,26 @@ main(int argc, char **argv)
 
 	/* parse arguments */
 	/* TODO: add version, help */
-	const struct argoat_sprig sprigs[9] = {
-		{ NULL,      0, NULL, NULL },
-		{ "height",  1, (void*) &opts->height,  handle_uint },
-		{ "h",       1, (void*) &opts->height,  handle_uint },
-		{ "width",   1, (void*) &opts->width,   handle_uint },
-		{ "w",       1, (void*) &opts->width,   handle_uint },
-		{ "iters",   1, (void*) &opts->iter,    handle_uint },
-		{ "i",       1, (void*) &opts->iter,    handle_uint },
-		{ "verbose", 0, (void*) &opts->verbose, handle_bool },
-		{ "v",       0, (void*) &opts->verbose, handle_bool },
+	const struct argoat_sprig sprigs[15] = {
+		{ NULL,       0, NULL, NULL },
+		{ "height",   1, (void*) &opts->height,  handle_u32   },
+		{ "h",        1, (void*) &opts->height,  handle_u32   },
+		{ "width",    1, (void*) &opts->width,   handle_u32   },
+		{ "w",        1, (void*) &opts->width,   handle_u32   },
+		{ "iters",    1, (void*) &opts->iter,    handle_u32   },
+		{ "i",        1, (void*) &opts->iter,    handle_u32   },
+		{ "leftbdr",  1, (void*) &opts->minre,   handle_float },
+		{ "rightbdr", 1, (void*) &opts->maxre,   handle_float },
+		{ "downbdr",  1, (void*) &opts->minim,   handle_float },
+		{ "topbdr",   1, (void*) &opts->maxim,   handle_float },
+		{ "verbose",  0, (void*) &opts->verbose, handle_bool  },
+		{ "v",        0, (void*) &opts->verbose, handle_bool  },
 	};
 
 	struct argoat args = { sprigs, sizeof(sprigs), NULL, 0, 0 };
 	argoat_graze(&args, argc, argv);
 
 	u64 total = opts->height * opts->width;
-
-	/*
-	 * TODO: define the following and
-	 * make it possible to tweak them
-	 * via command-line arguments:
-	 * 	- MinRe
-	 * 	- MaxRe
-	 * 	- MinIm
-	 * 	- MaxIm
-	 * 
-	 * (and also re_fact, im_fact, etc)
-	 */
 
 	/* initialize farbfeld stuff */
 	u32 tmp;
@@ -87,10 +85,13 @@ main(int argc, char **argv)
 
 	usize y;
 	for (y = 0; y < opts->height; ++y) {
-		float c_im = (y - opts->height / 1.8) * 3.5 / opts->width;
+		float c_im = opts->maxim - y * (opts->maxim - opts->minim)
+			/ (opts->height - 1);
 
 		for (usize x = 0; x < opts->width; ++x, ++pxctr) {
-			float c_re = (x - opts->width / 1.8) * 3.5 / opts->width;
+			float c_re = opts->minre + x * (opts->maxre - opts->minre)
+				/ (opts->width - 1);
+
 			float Z_re = c_re, Z_im = c_im;
 
         		/* number of iterations */
