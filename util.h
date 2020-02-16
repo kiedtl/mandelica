@@ -8,4 +8,7 @@ void handle_u32(void *data, char **pars, const int pars_count);
 void handle_float(void *data, char **pars, const int pars_count);
 void handle_bool(void *data, char **pars, const int pars_count);
 
+void version(void *data, char **pars, const int pars_count);
+void help(void *data, char **pars, const int pars_count);
+
 #endif

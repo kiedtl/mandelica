@@ -48,8 +48,8 @@ main(int argc, char **argv)
 
 	/* parse arguments */
 	/* TODO: add version, help */
-	const struct argoat_sprig sprigs[15] = {
-		{ NULL,       0, NULL, NULL },
+	const struct argoat_sprig sprigs[19] = {
+		{ NULL,       0, NULL,                   NULL         },
 		{ "height",   1, (void*) &opts->height,  handle_u32   },
 		{ "h",        1, (void*) &opts->height,  handle_u32   },
 		{ "width",    1, (void*) &opts->width,   handle_u32   },
@@ -62,6 +62,9 @@ main(int argc, char **argv)
 		{ "topbdr",   1, (void*) &opts->maxim,   handle_float },
 		{ "verbose",  0, (void*) &opts->verbose, handle_bool  },
 		{ "v",        0, (void*) &opts->verbose, handle_bool  },
+		{ "version",  0, NULL,                   version      },
+		{ "V",        0, NULL,                   version      },
+		{ "help",     0, NULL,                   help         },
 	};
 
 	struct argoat args = { sprigs, sizeof(sprigs), NULL, 0, 0 };
