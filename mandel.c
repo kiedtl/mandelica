@@ -24,7 +24,7 @@ main(int argc, char **argv)
 	opts = malloc(1 * sizeof(struct Options*));
 
 	if (opts == NULL) {
-		perror("mandel: error: ");
+		perror("mandelica: error: ");
 		return 1;
 	}
 
@@ -79,7 +79,7 @@ main(int argc, char **argv)
 
 	u16 *buf = malloc(opts->width * (4 * sizeof(u16)));
 	if (buf == NULL) {
-		perror("mandel: error: ");
+		perror("mandelica: error: ");
 		return 1;
 	}
 
@@ -134,7 +134,7 @@ main(int argc, char **argv)
 			buf[4 * x + 3] = htons(0xffff);   /* alpha */
 			
 			if ((pxctr & 2047) == 0 && opts->verbose) {
-				fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.",
+				fprintf(stderr, "\rmandelica: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.",
 						pxctr, total, y, opts->height,
 						bctr / 1024 / 1024,
 						(float) (((float) pxctr) / ((float) total) * 100));
@@ -145,7 +145,7 @@ main(int argc, char **argv)
 		bctr += (fwrite(buf, sizeof(u16), opts->width * 4, stdout) * sizeof(u16));
 	}
 
-	fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.\n",
+	fprintf(stderr, "\rmandelica: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.\n",
 			pxctr, total, y, opts->height,
 			bctr / 1024 / 1024,
 			(float) (((float) pxctr) / ((float) total) * 100));
