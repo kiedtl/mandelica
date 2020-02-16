@@ -144,9 +144,11 @@ main(int argc, char **argv)
 		bctr += (fwrite(buf, sizeof(u16), opts->width * 4, stdout) * sizeof(u16));
 	}
 
-	fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.\n",
-			pxctr, total, y, opts->height,
-			bctr / 1024 / 1024,
-			(float) (((float) pxctr) / ((float) total) * 100));
+	if (opts->verbose) {
+		fprintf(stderr, "\rmandel: pixel %lli/%lli, row %i/%i, wrote %lliMiB, %f%% completed.\n",
+				pxctr, total, y, opts->height,
+				bctr / 1024 / 1024,
+				(float) (((float) pxctr) / ((float) total) * 100));
+	}
 	if (buf) free(buf);
 }
