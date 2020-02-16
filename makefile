@@ -11,7 +11,7 @@ INC         = -Isub/ccommon/
 
 CC          = gcc
 CFLAGS      = -std=c99 -O4 $(WARN) $(INC) -ggdb
-LDFLAGS     = -fuse-ld=gold
+LDFLAGS     =
 
 all: $(NAME)
 
